@@ -1,0 +1,22 @@
+#!/bin/bash
+# 2-minute check that a GPU job starts, sees the GPU, and finds the Python environment.
+#   cd ~/urop_code/hpc/jobs && qsub 00_gpu_test.pbs
+#PBS -N urop_gpu_test
+#PBS -j oe
+#PBS -l select=1:ncpus=4:mem=16gb:ngpus=1
+#PBS -l walltime=00:15:00
+
+source "$HOME/urop_code/hpc/paths.sh"
+activate_env || exit 1
+export HF_HUB_OFFLINE=1
+nvidia-smi
+python - <<'EOF'
+import torch, diffusers, transformers
+print("torch", torch.__version__, "| CUDA available:", torch.cuda.is_available())
+print("GPU:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "none")
+x = torch.randn(4096, 4096, device="cuda")
+print("matmul OK:", float((x @ x).mean()) is not None)
+from transformers import ViTForImageClassification
+ViTForImageClassification.from_pretrained("google/vit-base-patch16-224-in21k", num_labels=5)
+print("ViT weights found offline: OK")
+EOF

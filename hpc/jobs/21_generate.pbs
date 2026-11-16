@@ -1,0 +1,34 @@
+#!/bin/bash
+# Generate fake defect photos for ONE fold with that fold's LoRAs. Settings via qsub -v:
+#   FOLD=0        which fold
+#   MODE=txt2img  txt2img (last semester's way) or img2img (variations of the real photos)
+#   STRENGTH=0.35 img2img only: how much SDXL may change the photo (0.2 = small, 0.5 = a lot)
+#   N=50          images per defect class
+#   CLASSES=Misalign:LowSolder   default: the 4 defect classes
+# Examples:
+#   qsub -v FOLD=0,N=4,CLASSES=Misalign 21_generate.pbs      (smoke test)
+#   qsub -v FOLD=0 21_generate.pbs
+#   qsub -v FOLD=0,MODE=img2img,STRENGTH=0.35 21_generate.pbs
+# Output: $UROP_WORK/gen/txt2img/f<FOLD>/<class>/*.png   (img2img: gen/img2img35/f<FOLD>/...)
+#PBS -N urop_gen
+#PBS -j oe
+#PBS -l select=1:ncpus=4:mem=32gb:ngpus=1
+#PBS -l walltime=02:00:00
+
+source "$HOME/urop_code/hpc/paths.sh"
+activate_env || exit 1
+export HF_HUB_OFFLINE=1
+cd "$UROP_HOME"
+FOLD=${FOLD:-0}
+MODE=${MODE:-txt2img}
+STRENGTH=${STRENGTH:-0.35}
+N=${N:-50}
+CLASSES=${CLASSES:-Misalign:NoSolder:LowSolder:Single}
+NAME=$MODE
+[ "$MODE" = "img2img" ] && NAME="img2img$(python -c "print(int(round($STRENGTH*100)))")"
+mkdir -p "$UROP_RESULTS/logs"
+exec > >(tee -a "$UROP_RESULTS/logs/gen_${NAME}_f${FOLD}_${PBS_JOBID%%.*}.log") 2>&1
+
+python hpc/generate.py --mode "$MODE" --strength "$STRENGTH" --n "$N" --classes ${CLASSES//:/ } \
+    --lora_root "$UROP_WORK/lora/f$FOLD" --src_root "$UROP_WORK/lora_data/f$FOLD" \
+    --out "$UROP_WORK/gen/$NAME/f$FOLD"

@@ -1,0 +1,30 @@
+# Keep data and anything derived from TE's photos out of this public repository
+*.jpg
+*.jpeg
+*.bmp
+*.tif
+*.tiff
+*.npy
+*.npz
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+te/te_outputs/*.png
+te/te_outputs/te_pool.csv
+te/te_outputs/te_generated.csv
+te/te_outputs/te_cheap.csv
+te/te_outputs/te_memorisation_examples.csv
+bench/bench_outputs/*.png
+bench/bench_outputs/*_index.csv
+hpc/splits/
+hpc/third_party/
+outputs/logs/
+UROP_data/
+gen/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

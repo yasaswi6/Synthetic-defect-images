@@ -1,0 +1,31 @@
+#!/bin/bash
+# Detector test (ViT, 5 folds). Settings come in with qsub -v (all optional):
+#   FEWSHOT=0   all real training photos (honest version of last semester's number)
+#   FEWSHOT=10  AITK situation: at most 10 real photos per defect class
+#   EXTRA=gen/txt2img/f{fold}   add fake images ({fold} = each fold's own; relative to $UROP_WORK)
+#   TAG=name    label for the results table;  SEEDS=0:1:2  repeat with several seeds
+#   FOLDS=0:1   only these folds (default all 5);  EPOCHS=2  fewer epochs (smoke test)
+# Examples:
+#   qsub 10_vit.pbs
+#   qsub -v FEWSHOT=10 10_vit.pbs
+#   qsub -v FEWSHOT=10,EXTRA=gen/txt2img/f{fold},TAG=sdxl_txt2img 10_vit.pbs
+#PBS -N urop_vit
+#PBS -j oe
+#PBS -l select=1:ncpus=8:mem=32gb:ngpus=1
+#PBS -l walltime=03:00:00
+
+source "$HOME/urop_code/hpc/paths.sh"
+activate_env || exit 1
+export HF_HUB_OFFLINE=1
+cd "$UROP_HOME"
+mkdir -p "$UROP_RESULTS/logs"
+exec > >(tee -a "$UROP_RESULTS/logs/vit_${TAG:-run}_${PBS_JOBID%%.*}.log") 2>&1
+
+ARGS=(--fewshot "${FEWSHOT:-0}")
+[ -n "$SEEDS" ] && ARGS+=(--seeds ${SEEDS//:/ })
+[ -n "$FOLDS" ] && ARGS+=(--folds ${FOLDS//:/ })
+[ -n "$EPOCHS" ] && ARGS+=(--epochs "$EPOCHS")
+[ -n "$EXTRA" ] && ARGS+=(--extra "$EXTRA")
+[ -n "$TAG" ] && ARGS+=(--tag "$TAG")
+echo "python hpc/vit_detector.py ${ARGS[*]}"
+python hpc/vit_detector.py "${ARGS[@]}"

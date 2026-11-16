@@ -1,0 +1,26 @@
+films: 28 images: 1200
+rep 0: random LR 0.937  grouped LR 0.783
+rep 1: random LR 0.950  grouped LR 0.882
+rep 2: random LR 0.926  grouped LR 0.827
+rep 3: random LR 0.929  grouped LR 0.824
+rep 4: random LR 0.945  grouped LR 0.843
+rep 5: random LR 0.947  grouped LR 0.817
+rep 6: random LR 0.937  grouped LR 0.885
+rep 7: random LR 0.957  grouped LR 0.845
+rep 8: random LR 0.958  grouped LR 0.851
+rep 9: random LR 0.945  grouped LR 0.848
+rep 10: random LR 0.948  grouped LR 0.830
+rep 11: random LR 0.951  grouped LR 0.919
+rep 12: random LR 0.937  grouped LR 0.821
+rep 13: random LR 0.881  grouped LR 0.809
+rep 14: random LR 0.944  grouped LR 0.840
+rep 15: random LR 0.935  grouped LR 0.846
+rep 16: random LR 0.936  grouped LR 0.826
+rep 17: random LR 0.942  grouped LR 0.877
+rep 18: random LR 0.903  grouped LR 0.847
+rep 19: random LR 0.957  grouped LR 0.797
+        logreg_bal_acc        nn1_bal_acc        nn_sim_median       
+                  mean    std        mean    std          mean    std
+split                                                                
+grouped          0.841  0.032       0.746  0.043         0.927  0.006
+random           0.938  0.018       0.901  0.023         0.946  0.005

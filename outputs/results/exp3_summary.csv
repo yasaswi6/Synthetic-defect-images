@@ -1,0 +1,5 @@
+,logreg_bal_acc,logreg_bal_acc,nn1_bal_acc,nn1_bal_acc,nn_sim_median,nn_sim_median
+,mean,std,mean,std,mean,std
+split,,,,,,
+grouped,0.841,0.032,0.746,0.043,0.927,0.006
+random,0.938,0.018,0.901,0.023,0.946,0.005

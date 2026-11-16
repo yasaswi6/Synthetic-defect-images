@@ -1,0 +1,47 @@
+Wilson 95% CI for 12/15 = 80%: [0.55, 0.93]
+
+=== riawelc: mean (sd) over 50 random draws ===
+                     small_macro_acc        big_macro_acc        big_escape_rate        big_false_alarm       
+                                mean    std          mean    std            mean    std            mean    std
+method                                                                                                        
+A baseline                     0.727  0.062         0.722  0.026           0.166  0.027           0.006  0.006
+B class-weighted               0.751  0.063         0.743  0.025           0.129  0.023           0.008  0.007
+C flip/rotate x15              0.773  0.045         0.769  0.023           0.127  0.026           0.004  0.006
+D +15 real (ceiling)           0.824  0.051         0.821  0.020           0.091  0.018           0.005  0.005
+
+|15-image per-class accuracy - large-test accuracy|
+dataset cls  mean_abs_err  p90_abs_err  max_abs_err
+riawelc  OK         0.009        0.022        0.067
+riawelc  D1         0.093        0.189        0.378
+riawelc  D2         0.096        0.185        0.340
+riawelc  D4         0.097        0.190        0.368
+
+Gain over baseline: large test vs 15-image test
+dataset               method  big_gain_mean  small_gain_mean  small_gain_sd  p_wrong_sign  p_small_says_no_gain
+riawelc     B class-weighted          0.021            0.025          0.025          0.24                  0.24
+riawelc    C flip/rotate x15          0.047            0.046          0.060          0.28                  0.30
+riawelc D +15 real (ceiling)          0.099            0.097          0.067          0.06                  0.06
+
+=== mtd: mean (sd) over 50 random draws ===
+                     small_macro_acc        big_macro_acc        big_escape_rate        big_false_alarm       
+                                mean    std          mean    std            mean    std            mean    std
+method                                                                                                        
+A baseline                     0.552  0.048         0.525  0.037           0.539  0.050           0.023  0.017
+B class-weighted               0.601  0.053         0.581  0.039           0.456  0.045           0.039  0.021
+C flip/rotate x15              0.615  0.053         0.598  0.039           0.447  0.042           0.027  0.014
+D +15 real (ceiling)           0.767  0.047         0.772  0.030           0.246  0.040           0.055  0.022
+
+|15-image per-class accuracy - large-test accuracy|
+dataset      cls  mean_abs_err  p90_abs_err  max_abs_err
+    mtd       OK         0.044        0.090        0.240
+    mtd Blowhole         0.118        0.240        0.400
+    mtd    Break         0.122        0.244        0.422
+    mtd    Crack         0.124        0.255        0.431
+    mtd     Fray           NaN          NaN          NaN
+    mtd   Uneven         0.093        0.197        0.327
+
+Gain over baseline: large test vs 15-image test
+dataset               method  big_gain_mean  small_gain_mean  small_gain_sd  p_wrong_sign  p_small_says_no_gain
+    mtd     B class-weighted          0.056            0.049          0.026          0.02                  0.02
+    mtd    C flip/rotate x15          0.073            0.063          0.039          0.06                  0.06
+    mtd D +15 real (ceiling)          0.247            0.215          0.049          0.00                  0.00

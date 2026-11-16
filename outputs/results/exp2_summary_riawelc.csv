@@ -1,0 +1,7 @@
+,small_macro_acc,small_macro_acc,big_macro_acc,big_macro_acc,big_escape_rate,big_escape_rate,big_false_alarm,big_false_alarm
+,mean,std,mean,std,mean,std,mean,std
+method,,,,,,,,
+A baseline,0.727,0.062,0.722,0.026,0.166,0.027,0.006,0.006
+B class-weighted,0.751,0.063,0.743,0.025,0.129,0.023,0.008,0.007
+C flip/rotate x15,0.773,0.045,0.769,0.023,0.127,0.026,0.004,0.006
+D +15 real (ceiling),0.824,0.051,0.821,0.02,0.091,0.018,0.005,0.005

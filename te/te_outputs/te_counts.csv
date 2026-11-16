@@ -1,0 +1,6 @@
+cls,train,held_out
+OK,100,27
+Misalign,10,20
+NoSolder,9,15
+LowSolder,9,25
+Single,10,349

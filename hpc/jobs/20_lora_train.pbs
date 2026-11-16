@@ -1,0 +1,51 @@
+#!/bin/bash
+# Train one SDXL LoRA per class on ONE fold's training photos (last semester's v6 recipe:
+# diffusers train_text_to_image_lora_sdxl.py, 512 px, batch 1, lr 1e-4, fp16, text-encoder LoRA;
+# rank 16). Settings via qsub -v (all optional):
+#   FOLD=0                     which fold (0-4)
+#   CLASSES=Misalign:LowSolder  classes to train, separated by ':' (default: the 4 defect classes)
+#   FEWSHOT=10                 real photos per class the LoRA may see (0 = all training photos)
+#   STEPS=1500                 training steps per class (~20 min each on an A40)
+# Examples:
+#   qsub -v FOLD=0,CLASSES=Misalign,STEPS=50 20_lora_train.pbs     (smoke test)
+#   qsub -v FOLD=0 20_lora_train.pbs
+# Output: $UROP_WORK/lora/f<FOLD>/<class>/pytorch_lora_weights.safetensors
+#PBS -N urop_lora
+#PBS -j oe
+#PBS -l select=1:ncpus=8:mem=48gb:ngpus=1
+#PBS -l walltime=06:00:00
+
+source "$HOME/urop_code/hpc/paths.sh"
+activate_env || exit 1
+export HF_HUB_OFFLINE=1
+cd "$UROP_HOME"
+FOLD=${FOLD:-0}
+CLASSES=${CLASSES:-Misalign:NoSolder:LowSolder:Single}
+FEWSHOT=${FEWSHOT:-10}
+STEPS=${STEPS:-1500}
+RANK=${RANK:-16}
+DATA="$UROP_WORK/lora_data/f$FOLD"
+OUT="$UROP_WORK/lora/f$FOLD"
+mkdir -p "$UROP_RESULTS/logs"
+exec > >(tee -a "$UROP_RESULTS/logs/lora_f${FOLD}_${PBS_JOBID%%.*}.log") 2>&1
+
+python hpc/fix_lora_script.py || exit 1
+python hpc/lora_data.py --fold "$FOLD" --fewshot "$FEWSHOT" --out "$DATA" --classes ${CLASSES//:/ } || exit 1  # only these classes: parallel jobs never touch each other's folders
+for C in ${CLASSES//:/ }; do
+    # skip only a LoRA that finished with the same number of steps (so the 50-step smoke LoRA is never reused)
+    if [ -f "$OUT/$C/pytorch_lora_weights.safetensors" ] && [ "$(cat "$OUT/$C/steps.txt" 2>/dev/null)" = "$STEPS" ]; then
+        echo "== $C already trained ($STEPS steps), skipping"; continue; fi
+    echo "== training LoRA for $C (fold $FOLD, $STEPS steps)  $(date)"
+    accelerate launch --num_processes 1 --num_machines 1 --mixed_precision fp16 --dynamo_backend no \
+        hpc/third_party/train_text_to_image_lora_sdxl.py \
+        --pretrained_model_name_or_path stabilityai/stable-diffusion-xl-base-1.0 --variant fp16 \
+        --pretrained_vae_model_name_or_path madebyollin/sdxl-vae-fp16-fix \
+        --train_data_dir "$DATA/$C" --caption_column text \
+        --resolution 512 --random_flip --train_batch_size 1 \
+        --max_train_steps "$STEPS" --checkpointing_steps 100000 \
+        --learning_rate 1e-4 --lr_scheduler constant --lr_warmup_steps 0 \
+        --rank "$RANK" --train_text_encoder --mixed_precision fp16 --seed 42 \
+        --dataloader_num_workers 4 --output_dir "$OUT/$C" || exit 1
+    echo "$STEPS" > "$OUT/$C/steps.txt"
+done
+echo "== done $(date)"
